@@ -79,7 +79,7 @@ df_pop <- places |>
 
 3. **Describe what this data frame contains.**
 
-    - After importing the data and establishing plot aesthetics, the author proceeds to wrangle the data. The author proceeds to filter the `places` data frame to just the US region, and modifies the state column with the `str_replace` function to modify the state string pattern Aa to be both capitalized. The author then groups by state to obtain a sum of the population per state. In order to prevent `df_pop` from being grouped by state, the author ungroups. 
+    - After importing the data and establishing plot aesthetics, the author proceeds to wrangle the data. The author proceeds to filter the `places` data frame to just the US region, and modifies the state column with the `str_replace` function to modify the state string pattern Aa to be both capitalized. The author then groups by state to obtain a sum of the population per state. In order to prevent `df_pop` from being grouped by state, the author ungroups. This produces a dataframe with two columns; one column for the state and another column for the population per state. 
 
 ### ii. Create `df_us`
 
@@ -103,11 +103,11 @@ df_us <- ufo_sightings |>
 
 4. **Describe what this data frame contains.**
 
-    - After producing a dataframe with the total population per state, the author proceeds to create a dataframe with the `ufo_sightings` data. The author filters this data to the US and uses `str_replace` to update the state column similar to the `df_pop` dataframe. The 
+    - After producing a dataframe with the total population per state, the author proceeds to create a dataframe with the `ufo_sightings` data. The author filters this data to the US and uses `str_replace` to update the state column similar to the `df_pop` dataframe.  This dataframe contains a row for state, number of ufo observations per state, the population per state, and the number of observations per 10,000 inviduals which is used to calculate the opacity value column. 
 
 5. **What does `opacity_val` represent, and why is it calculated?**
 
-    - Answer here
+    - The author renames the `n` column to be called `num_obs` and creates two new columns with the `mutate()` function; one column is the number of observations per population and the other column uses the `num_obs_per10k` to produce an opacity value based on the maximum of the `num_obs_per10k` column. This value is calculated because when plotted, it controls the opacity based on the number of observations per 10,000 people. 
 
 ### iii. Create `df_shape`
 
@@ -115,15 +115,22 @@ df_us <- ufo_sightings |>
 #| eval: false
 #| echo: true
 
-df_shape <- ufo_sightings |>
+df_shape1 <- ufo_sightings |>
+  # Filter df for any shape not unknown or other 
   filter(!shape %in% c("unknown", "other")) |>
+  # count the number of shapes
   count(shape) |>
+  # rename "count" column 
   rename(total_sightings = n) |> 
+  # Arrange total sightings in order 
   arrange(desc(total_sightings)) |>
+  # only keep the top 10
   slice_head(n = 10) |>
+  # reorder the shape column so that it is ordered by total sightings 
   mutate(
     shape = fct_reorder(.f = shape, 
                         .x = total_sightings), 
+    # Create column using total sightings for opacity, rescale 
     opacity_val = scales::rescale(x = total_sightings, 
                                   to = c(0.3, 1))
     )
@@ -131,15 +138,15 @@ df_shape <- ufo_sightings |>
 
 6. **Describe what this data frame contains.**
 
-    - Answer here
+    - This dataframe contains three columns. One column contains the top ten most common shape of ufos, another column contains the total sightings per shape, and another column contains the opacity value to color the shapes by. 
 
 7. **What does `fct_reorder` do when it is applied to the `shape` variable? What would have happened if this step was not performed?**
 
-    - Answer here
+    - The function `fct_reorder` reorders the shape columnso that it is ordered by total sightings. If this step is not performed, then the dataframe will not be order in descending order of sightings. 
 
 8. **What is the purpose of rescaling `opacity_val`? And why rescale from 0.3 to 1?**
 
-    - Answer here
+    - Rescaling `opacity_val` ensures that the opacity value is not too intense for plotting. The opacity value is derived from the `total_sightings` columns, and this does not ensure that the opacity will be greater than 1 (too bright) or less than 0.3 (not enough brightness). By rescaling, you can adjust to the correct opacity, which can be altered based on what works with the data. 
 
 ### iv. Create `df_day_hour`
 
@@ -148,30 +155,35 @@ df_shape <- ufo_sightings |>
 #| echo: true
 
 df_day_hour <- ufo_sightings |>
+  # Get days from a date time 
   mutate(
-    day = wday(reported_date_time), 
-    hour = hour(reported_date_time), 
-    wday = wday(reported_date_time, label = TRUE) 
+    day = wday(reported_date_time), # Extract day from column with wday function
+    hour = hour(reported_date_time),  #Extract hour from column 
+    wday = wday(reported_date_time, label = TRUE) # Extract week day from colum as a character (label = TRUE)
   ) |>
+  # Sum the totals of the three columns
   count(day, wday, hour) |>
+  # Rename the count to be total daily obs 
   rename(total_daily_obs = n) |> 
+  # Create an opacity value based on the total daily observations 
   mutate(
     opacity_val = total_daily_obs / max(total_daily_obs),
+    # Label the hours into three categories
     hour_lab = case_when(
-      hour == 0 ~ "12am",
-      hour <= 12 ~ paste0(hour, "am"),
-      hour == 12 ~ "12pm",
+      hour == 0 ~ "12am", # hour 0 = 12 am 
+      hour <= 12 ~ paste0(hour, "am"), # hours less than or equal to 12 = hour "am"
+      hour == 12 ~ "12pm", # hour 12 = 12 pm 
       TRUE ~ paste0(hour - 12, "pm")) 
     )
 ```
 
 9. **Describe what this data frame contains.**
 
-    - Answer here
+    - This data frame contains three columns pertaining to daily observations of ufo sightings. It has four time-related columns including; a column called `day` containing the weekday number, a column called `wday` with the actual character day of the week, an hour column for the 24 hour clock, and a column called `hour_lab` that is the 12-hr clock label. Additionally, it has a column for total ufo sightings per day, and an `opacity_val` column for plotting. 
 
 10. **What is the purpose of the last line inside the `case_when()` statement (`TRUE ~ paste0(hour - 12, "pm")`)?**
 
-    - Answer here
+    - The `case_when()` function is used to vectorize if-else statements. In order to produce the `hour_lab` column, the hour column is filtered and "binned" into specific cases if they apply to it. The last statement ensures that any hours that do not satisfy the above statement are binned as "pm" with their respective times subtracted from 12. 
 
 ## III. Prepare text elements
 
@@ -193,7 +205,7 @@ caption <- glue("{original}{space}{dan_github}
 
 11. **In your own words, what is the difference between `paste0()` and `glue()`? Why did the author use `paste0` to construct `quotes` and `glue` to construct the other text elements?**
 
-    - Answer here
+    - The `paste0` function is an efficient way to concatenate character strings (e.g., qoutes) without specifically specifying the `sep = ""` argument in `paste()`. The `glue()` function can integrate code within statements with braces, similar to the f-string in Python. This is helpful when annoting plots. 
 
 ## IV. Build plots
 
@@ -231,11 +243,13 @@ plot_shape <- ggplot(data = df_shape) +
                                  margin = margin(b = 10)),
     legend.position = "none" 
   )
+# View 
+plot_shape
 ```
 
 12. **Explain the values provided to the `x` aesthetic for both text geoms (`shape` & `total_sightings`).**
 
-    - Answer here
+    - Within the `geom_text()` argument, x represents the positioning along the x axis. The first `geom_text` defines where to put the label for each bar with the shape name, with x = 200 placing the bar slightly within the left edge of the bar. The second `geom_text` defines where to place the text, placing thise one 200 units to the right. 
 
 ### ii. Build `plot_us` 
 
@@ -246,19 +260,24 @@ plot_shape <- ggplot(data = df_shape) +
 #| echo: true
 
 plot_us <-  ggplot(df_us) +
+  # Plot rectangles colored by the opacity value of df_us from 0 to 1 on x and y axis
   geom_rect(aes(xmin = 0, xmax = 1, ymin = 0, ymax = 1, alpha = opacity_val), 
-            fill = accent) +
+            fill = accent) + # fill with customized color 
+  # Add a label foreach state, specify where on each individual square the label should be 
   geom_text(aes(x = 0.5, y = 0.7, label = state), 
             family = "orb", 
             fontface = "bold",
             size = 9, 
             color = bg) +
+  # Add text label for number of observations per state 
   geom_text(aes(x = 0.5, y = 0.3, label = round(num_obs_per10k, 1)), 
             family = "orb", 
             fontface = "bold",
             size = 8, 
             color = bg) +  
+  # Facet by state using the geofacet package 
   geofacet::facet_geo(~state) +
+  # Ensures map is a 1:1 ratio
   coord_fixed(ratio = 1) +
   labs(subtitle = "Sightings per 10k population") +
   theme_void() +
@@ -275,7 +294,7 @@ plot_us <-  ggplot(df_us) +
 
 13. **Consider the order of `geom_*()` layers in the the above plot (`plot_us`). Why did the author order the layers in this way?**
 
-    - Answer here
+    - The author orders them by first establishing one single rectangle, specifying its position and aesthetics. The author then layers on text for state and ufo sightings. Since ggplot layers on features, we need to establish the background shape and text and then use `geofacet::` package to facet by state on a map of the U.S. 
 
 ### iii. Build `plot_day`
 
@@ -298,7 +317,7 @@ plot_day <- ggplot(data = df_day_hour) +
             color = bg, 
             size = 8) + 
   ylim(-5, 9) +
-  xlim(NA, 23.55) +
+  #xlim(NA, 23.55) +
   coord_polar() +
   theme_void() +
   theme(
@@ -309,11 +328,11 @@ plot_day <- ggplot(data = df_day_hour) +
 
 14. **This plot includes one-letter labels for each day of the week. How is ths accomplished when week days are written using their three-letter abbreviations (e.g. `Mon`, `Tue`) in the `df_day_hour` data frame?**
 
-    - Answer here
+    - This is done with line 314 of the code where the author uses `str_sub` to extract one letter with the start and end arguments. 
 
 15. **What role do the `ylim()` and `xlim()` functions play in shaping a ggplot, and how do they change the visual layout of this particular plot? To better understand their effect, try rerunning the code with each of these lines commented out and observe how the plot’s spacing and composition change.**
 
-    - Answer here
+    - In a ggplot, the `ylim()` and `xlim()` features can adjust for the limits to the x and y axis. For this particular plot, these coordiantes are used before the `coord_polar` feature (used for pie charts), which makes y the radius of the plot. Since the y axis is day, the limit specifies how the days should line up along the radius, and the x-axis corresponds to the hour, the numbers controls the way the tiles wrap around the pie. 
 
 ### iv. Build `quote*`s
 
@@ -370,11 +389,15 @@ quote3 <- ggplot() +
   ylim(0, 1) +
   theme_void() +
   coord_cartesian(clip = "off")
+
+quote1
+quote2
+quote3
 ```
 
 16. **Why do you think the author chose to convert these text elements (and also in `plot_ufo`, below!) into ggplot objects (you may consider returning to this question after you've worked your way through all of the code)?**
 
-    - Answer here
+    - The author decided to convert the text elements into ggplot objects in order to plot them on the base plot in lines 468-470. By converting them into ggplot objects, they can be adjusted with more details and placed in specific locations on the base plot with `inset_element`. 
 
 ### v. Build `plot_ufo`
 
@@ -420,16 +443,17 @@ plot_base <- ggplot() +
                                  margin = margin(b = 20)),
     plot.caption = ggtext::element_markdown(family = "bar",
                                             face = "italic",
-                                            color = colorspace::darken(accent, 0.25),
+                                           color = colorspace::darken(accent, 0.25),
                                             hjust = 0.5,
                                             margin = margin(t = 20)),
     plot.margin = margin(b = 20, t = 50, r = 50, l = 50)
   )
+plot_base
 ```
 
 17. **Why does the author render `plot.caption` using `ggtext::element_markdown()`, rather than `element_text()` (like he does for rendering `plot.title` and `text`)?**
 
-    - Answer here
+    - The author uses `element_markdown()` to render more caption features that are not used in the `element_text()` feature of ggplot. Additionally, using `element_markdown` is helpful for captions because they might already contain some markdown styling and often include different styles in one line, which this feature can perform. 
 
 ## V. Assemble & save
 
@@ -460,11 +484,11 @@ ggsave(plot = plot_final,
 
 18. **Explain how `plot_final` is assembled. What do you think is the most challenging aspect of arranging all components into a single plot?**
 
-    - Answer here
+    - `plot_final` is assembled by first initializing a base plot with `plot_base()`. Then, the shapes are positioned by defining their position on the base plot with the left, right, and bottom arguments. The plot is then filled with a background color from the pre-defined aesthetics. The most challenging aspect of arranging all components into a single plot is specifying the arguments correctly and layering the ggplot elements correctly. 
 
 19. **Can you think of one reason the author may have chosen to separate the construction of `plot_base` and `plot_final`?**
 
-    - Answer here
+    - By adding the `inset_element` to the plot base, this allows for you to add layers onto the base like painting a canvas. These pieces for the `plot_final` and can be adjusted and iterable when needed. 
 
 ## Answer some final reflective questions 
 
@@ -472,28 +496,28 @@ ggsave(plot = plot_final,
 
     a. **What "perceptual tasks" (from Cleveland & McGill's heirarchy) must the viewer perform to extract information from these visualizations?**
         
-        - Answer here
+        - The final visualization is easy to understand because the author balances these percetual tasks. For instance, the bar chart of top ten most commonly reported shapes is an example of great positioning, where the viewer judges the length of the bars to obtain information. Additionally, the author utilizing hue and shade to display patterns in the data. For instance, the map of sightings per 10k population is easy to understand because it utilizes hue to show which states have the most ufo sightings. 
     
     b. **What task(s) do you think the author wanted to enable or message(s) he wanted to convey with these visualizations (see lecture 2.1, slide 16 for examples)? Be sure to note at least one task / message for each of the three data viz.**
     
-        - Answer here
+        - The author was interested in showing individual values between ufo shapes, state sightings, and time of day sightinings, however they also wanted to compare these trends within each respective plot. For the "ten most commonly reported shapes" graph, the author was interested in showing trends across reported shapes. The inclusion of the data values for each shape was very intentional and also allows you to compare the individual values across shapes. For the "sightings per 10k population" graph, the author is comparing individual state values for ufo sightings, and due to the nature of the graph being a map, it also is including a spatial element to the message. For the pie chart graph of the most common hours, this graph is clearly displaying big picture trends in ufo sightings on a temporal scale. 
     
     c. **Name at least one caveat to the "hierarchy of perceptual tasks" that the author employed to achieve a goal(s) you noted in question b?**
     
-        - Answer here
+        - One caveat is that the when glancing at the graph, you can easily draw conclusions solely based on the way the elements are arranged. For the "10 most commonly reported shapes", the data most clearly shows that light is the most reported shape with the inclusion of the data value. By making this bar the strongest hue, it clearly displays the message. 
 
 21. **Describe two elements of this piece that you find visually-pleasing / easy to understand / intuitive. Why?** 
 
-    - Answer here
+    - I think that the use of hue and the inclusion of the map of the US are visually-pleasing. I find that using hue against the black base plot is eye-catching and also easy to understand. I think the inclusion of the map of the US was very smart, as you could just show the top ten most common states with ufo sightings, but by including a map you get to see the trends spatially which is interesting. 
 
 22. **Describe two elements of this piece that you feel could be better presented in a different way. Why?** 
 
-    - Answer here
+    - I am personally not a fan of the bottom left graph because of the lack of title and the visual is less intiutive. You can infer that the hours 1 am to 4 am are peak hours for ufo sightings, however the hours around the chart  coupled with the grid-like style add too much visual cognitive load. 
     
 23. **Describe two new things that you learned by interpreting / annotating this code. These could be packages, functions, or even code organizational approaches that you hadn't previously known about or considered.**
 
-    - Answer here
+    - I learned about the use of pre-defnining graphing aesthetics before graphing. I learned new data wrangling techniques with `fct_reorder`. I learned about the `geofacet` package. 
 
 24. **How, if at all, did you use AI tools to help you interpret this code? Describe your approach to using these tools for this assignment. In what ways was consulting the documentation more (or less) helpful than using AI?**
 
-    - Answer here
+    - I utilized ChatGPT for a few questions for this assignment. I found that when prompting it with the code and asking for it to add comments, that was a quick way to break down the complexities. What I found more helpful was looking up the documentation in the console. Since this is how I originally learned ot code, I found that this interface is easy to understand especially when viewing what arguments do what in each function. 

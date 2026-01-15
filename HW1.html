@@ -189,10 +189,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-27"><a href="#cb1-27"></a>showtext<span class="sc">::</span><span class="fu">showtext_auto</span>(<span class="at">enable =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol type="1">
-<li><p><strong>What is the author defining in lines 15-17? Where else in the code do these defined variables show up? What advantage(s) is there to defining these values here, as variables, rather than defining the values directly throughout the script?</strong></p></li>
+<li><p><strong>What is the author defining in lines 15-17? Where else in the code do these defined variables show up? What advantage(s) is there to defining these values here, as variables, rather than defining the values directly throughout the script?</strong></p>
+<p>The author is defining graphical aesthetics that will remain consistent throughout the project. By making these pre-defined in the set-up for the project, the author can reference them as they build their data visualizations, streamling the process and eliminating repetitive code.</p></li>
 <li><p><strong>In your own words, explain what the function, <code>font_add_google()</code>, does. What’s the difference between the two arguments, <code>name</code> and <code>family</code>?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>This is a function that searches Google adds fonts to your plots. The <code>name</code> argument is the Google Fonts name that will be searched and <code>family</code> specifies the font that R can understand.</li>
 </ul></li>
 </ol>
 </section>
@@ -213,7 +214,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="3" type="1">
 <li><p><strong>Describe what this data frame contains.</strong></p>
 <ul>
-<li>Answer here</li>
+<li>After importing the data and establishing plot aesthetics, the author proceeds to wrangle the data. The author proceeds to filter the <code>places</code> data frame to just the US region, and modifies the state column with the <code>str_replace</code> function to modify the state string pattern Aa to be both capitalized. The author then groups by state to obtain a sum of the population per state. In order to prevent <code>df_pop</code> from being grouped by state, the author ungroups. This produces a dataframe with two columns; one column for the state and another column for the population per state.</li>
 </ul></li>
 </ol>
 </section>
@@ -236,42 +237,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="4" type="1">
 <li><p><strong>Describe what this data frame contains.</strong></p>
 <ul>
-<li>Answer here</li>
+<li>After producing a dataframe with the total population per state, the author proceeds to create a dataframe with the <code>ufo_sightings</code> data. The author filters this data to the US and uses <code>str_replace</code> to update the state column similar to the <code>df_pop</code> dataframe. This dataframe contains a row for state, number of ufo observations per state, the population per state, and the number of observations per 10,000 inviduals which is used to calculate the opacity value column.</li>
 </ul></li>
 <li><p><strong>What does <code>opacity_val</code> represent, and why is it calculated?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The author renames the <code>n</code> column to be called <code>num_obs</code> and creates two new columns with the <code>mutate()</code> function; one column is the number of observations per population and the other column uses the <code>num_obs_per10k</code> to produce an opacity value based on the maximum of the <code>num_obs_per10k</code> column. This value is calculated because when plotted, it controls the opacity based on the number of observations per 10,000 people.</li>
 </ul></li>
 </ol>
 </section>
 <section id="iii.-create-df_shape" class="level3">
 <h3 class="anchored" data-anchor-id="iii.-create-df_shape">iii. Create <code>df_shape</code></h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>df_shape <span class="ot">&lt;-</span> ufo_sightings <span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span>shape <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"unknown"</span>, <span class="st">"other"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">count</span>(shape) <span class="sc">|&gt;</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">rename</span>(<span class="at">total_sightings =</span> n) <span class="sc">|&gt;</span> </span>
-<span id="cb4-5"><a href="#cb4-5"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_sightings)) <span class="sc">|&gt;</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb4-8"><a href="#cb4-8"></a>    <span class="at">shape =</span> <span class="fu">fct_reorder</span>(<span class="at">.f =</span> shape, </span>
-<span id="cb4-9"><a href="#cb4-9"></a>                        <span class="at">.x =</span> total_sightings), </span>
-<span id="cb4-10"><a href="#cb4-10"></a>    <span class="at">opacity_val =</span> scales<span class="sc">::</span><span class="fu">rescale</span>(<span class="at">x =</span> total_sightings, </span>
-<span id="cb4-11"><a href="#cb4-11"></a>                                  <span class="at">to =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="dv">1</span>))</span>
-<span id="cb4-12"><a href="#cb4-12"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>df_shape1 <span class="ot">&lt;-</span> ufo_sightings <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="co"># Filter df for any shape not unknown or other </span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">filter</span>(<span class="sc">!</span>shape <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"unknown"</span>, <span class="st">"other"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="co"># count the number of shapes</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="fu">count</span>(shape) <span class="sc">|&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="co"># rename "count" column </span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="fu">rename</span>(<span class="at">total_sightings =</span> n) <span class="sc">|&gt;</span> </span>
+<span id="cb4-8"><a href="#cb4-8"></a>  <span class="co"># Arrange total sightings in order </span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_sightings)) <span class="sc">|&gt;</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="co"># only keep the top 10</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a>  <span class="co"># reorder the shape column so that it is ordered by total sightings </span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    <span class="at">shape =</span> <span class="fu">fct_reorder</span>(<span class="at">.f =</span> shape, </span>
+<span id="cb4-15"><a href="#cb4-15"></a>                        <span class="at">.x =</span> total_sightings), </span>
+<span id="cb4-16"><a href="#cb4-16"></a>    <span class="co"># Create column using total sightings for opacity, rescale </span></span>
+<span id="cb4-17"><a href="#cb4-17"></a>    <span class="at">opacity_val =</span> scales<span class="sc">::</span><span class="fu">rescale</span>(<span class="at">x =</span> total_sightings, </span>
+<span id="cb4-18"><a href="#cb4-18"></a>                                  <span class="at">to =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="dv">1</span>))</span>
+<span id="cb4-19"><a href="#cb4-19"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol start="6" type="1">
 <li><p><strong>Describe what this data frame contains.</strong></p>
 <ul>
-<li>Answer here</li>
+<li>This dataframe contains three columns. One column contains the top ten most common shape of ufos, another column contains the total sightings per shape, and another column contains the opacity value to color the shapes by.</li>
 </ul></li>
 <li><p><strong>What does <code>fct_reorder</code> do when it is applied to the <code>shape</code> variable? What would have happened if this step was not performed?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The function <code>fct_reorder</code> reorders the shape columnso that it is ordered by total sightings. If this step is not performed, then the dataframe will not be order in descending order of sightings.</li>
 </ul></li>
 <li><p><strong>What is the purpose of rescaling <code>opacity_val</code>? And why rescale from 0.3 to 1?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>Rescaling <code>opacity_val</code> ensures that the opacity value is not too intense for plotting. The opacity value is derived from the <code>total_sightings</code> columns, and this does not ensure that the opacity will be greater than 1 (too bright) or less than 0.3 (not enough brightness). By rescaling, you can adjust to the correct opacity, which can be altered based on what works with the data.</li>
 </ul></li>
 </ol>
 </section>
@@ -279,30 +287,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="iv.-create-df_day_hour">iv. Create <code>df_day_hour</code></h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>df_day_hour <span class="ot">&lt;-</span> ufo_sightings <span class="sc">|&gt;</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-3"><a href="#cb5-3"></a>    <span class="at">day =</span> <span class="fu">wday</span>(reported_date_time), </span>
-<span id="cb5-4"><a href="#cb5-4"></a>    <span class="at">hour =</span> <span class="fu">hour</span>(reported_date_time), </span>
-<span id="cb5-5"><a href="#cb5-5"></a>    <span class="at">wday =</span> <span class="fu">wday</span>(reported_date_time, <span class="at">label =</span> <span class="cn">TRUE</span>) </span>
-<span id="cb5-6"><a href="#cb5-6"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-7"><a href="#cb5-7"></a>  <span class="fu">count</span>(day, wday, hour) <span class="sc">|&gt;</span></span>
-<span id="cb5-8"><a href="#cb5-8"></a>  <span class="fu">rename</span>(<span class="at">total_daily_obs =</span> n) <span class="sc">|&gt;</span> </span>
-<span id="cb5-9"><a href="#cb5-9"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-10"><a href="#cb5-10"></a>    <span class="at">opacity_val =</span> total_daily_obs <span class="sc">/</span> <span class="fu">max</span>(total_daily_obs),</span>
-<span id="cb5-11"><a href="#cb5-11"></a>    <span class="at">hour_lab =</span> <span class="fu">case_when</span>(</span>
-<span id="cb5-12"><a href="#cb5-12"></a>      hour <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">"12am"</span>,</span>
-<span id="cb5-13"><a href="#cb5-13"></a>      hour <span class="sc">&lt;=</span> <span class="dv">12</span> <span class="sc">~</span> <span class="fu">paste0</span>(hour, <span class="st">"am"</span>),</span>
-<span id="cb5-14"><a href="#cb5-14"></a>      hour <span class="sc">==</span> <span class="dv">12</span> <span class="sc">~</span> <span class="st">"12pm"</span>,</span>
-<span id="cb5-15"><a href="#cb5-15"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fu">paste0</span>(hour <span class="sc">-</span> <span class="dv">12</span>, <span class="st">"pm"</span>)) </span>
-<span id="cb5-16"><a href="#cb5-16"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-2"><a href="#cb5-2"></a>  <span class="co"># Get days from a date time </span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-4"><a href="#cb5-4"></a>    <span class="at">day =</span> <span class="fu">wday</span>(reported_date_time), <span class="co"># Extract day from column with wday function</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>    <span class="at">hour =</span> <span class="fu">hour</span>(reported_date_time),  <span class="co">#Extract hour from column </span></span>
+<span id="cb5-6"><a href="#cb5-6"></a>    <span class="at">wday =</span> <span class="fu">wday</span>(reported_date_time, <span class="at">label =</span> <span class="cn">TRUE</span>) <span class="co"># Extract week day from colum as a character (label = TRUE)</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a>  <span class="co"># Sum the totals of the three columns</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a>  <span class="fu">count</span>(day, wday, hour) <span class="sc">|&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>  <span class="co"># Rename the count to be total daily obs </span></span>
+<span id="cb5-11"><a href="#cb5-11"></a>  <span class="fu">rename</span>(<span class="at">total_daily_obs =</span> n) <span class="sc">|&gt;</span> </span>
+<span id="cb5-12"><a href="#cb5-12"></a>  <span class="co"># Create an opacity value based on the total daily observations </span></span>
+<span id="cb5-13"><a href="#cb5-13"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-14"><a href="#cb5-14"></a>    <span class="at">opacity_val =</span> total_daily_obs <span class="sc">/</span> <span class="fu">max</span>(total_daily_obs),</span>
+<span id="cb5-15"><a href="#cb5-15"></a>    <span class="co"># Label the hours into three categories</span></span>
+<span id="cb5-16"><a href="#cb5-16"></a>    <span class="at">hour_lab =</span> <span class="fu">case_when</span>(</span>
+<span id="cb5-17"><a href="#cb5-17"></a>      hour <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">"12am"</span>, <span class="co"># hour 0 = 12 am </span></span>
+<span id="cb5-18"><a href="#cb5-18"></a>      hour <span class="sc">&lt;=</span> <span class="dv">12</span> <span class="sc">~</span> <span class="fu">paste0</span>(hour, <span class="st">"am"</span>), <span class="co"># hours less than or equal to 12 = hour "am"</span></span>
+<span id="cb5-19"><a href="#cb5-19"></a>      hour <span class="sc">==</span> <span class="dv">12</span> <span class="sc">~</span> <span class="st">"12pm"</span>, <span class="co"># hour 12 = 12 pm </span></span>
+<span id="cb5-20"><a href="#cb5-20"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="fu">paste0</span>(hour <span class="sc">-</span> <span class="dv">12</span>, <span class="st">"pm"</span>)) </span>
+<span id="cb5-21"><a href="#cb5-21"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol start="9" type="1">
 <li><p><strong>Describe what this data frame contains.</strong></p>
 <ul>
-<li>Answer here</li>
+<li>This data frame contains three columns pertaining to daily observations of ufo sightings. It has four time-related columns including; a column called <code>day</code> containing the weekday number, a column called <code>wday</code> with the actual character day of the week, an hour column for the 24 hour clock, and a column called <code>hour_lab</code> that is the 12-hr clock label. Additionally, it has a column for total ufo sightings per day, and an <code>opacity_val</code> column for plotting.</li>
 </ul></li>
 <li><p><strong>What is the purpose of the last line inside the <code>case_when()</code> statement (<code>TRUE ~ paste0(hour - 12, "pm")</code>)?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The <code>case_when()</code> function is used to vectorize if-else statements. In order to produce the <code>hour_lab</code> column, the hour column is filtered and “binned” into specific cases if they apply to it. The last statement ensures that any hours that do not satisfy the above statement are binned as “pm” with their respective times subtracted from 12.</li>
 </ul></li>
 </ol>
 </section>
@@ -324,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="11" type="1">
 <li><p><strong>In your own words, what is the difference between <code>paste0()</code> and <code>glue()</code>? Why did the author use <code>paste0</code> to construct <code>quotes</code> and <code>glue</code> to construct the other text elements?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The <code>paste0</code> function is an efficient way to concatenate character strings (e.g., qoutes) without specifically specifying the <code>sep = ""</code> argument in <code>paste()</code>. The <code>glue()</code> function can integrate code within statements with braces, similar to the f-string in Python. This is helpful when annoting plots.</li>
 </ul></li>
 </ol>
 </section>
@@ -360,12 +373,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-25"><a href="#cb7-25"></a>                                 <span class="at">hjust =</span> <span class="dv">0</span>,  </span>
 <span id="cb7-26"><a href="#cb7-26"></a>                                 <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">10</span>)),</span>
 <span id="cb7-27"><a href="#cb7-27"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span> </span>
-<span id="cb7-28"><a href="#cb7-28"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-28"><a href="#cb7-28"></a>  )</span>
+<span id="cb7-29"><a href="#cb7-29"></a><span class="co"># View </span></span>
+<span id="cb7-30"><a href="#cb7-30"></a>plot_shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol start="12" type="1">
 <li><p><strong>Explain the values provided to the <code>x</code> aesthetic for both text geoms (<code>shape</code> &amp; <code>total_sightings</code>).</strong></p>
 <ul>
-<li>Answer here</li>
+<li>Within the <code>geom_text()</code> argument, x represents the positioning along the x axis. The first <code>geom_text</code> defines where to put the label for each bar with the shape name, with x = 200 placing the bar slightly within the left edge of the bar. The second <code>geom_text</code> defines where to place the text, placing thise one 200 units to the right.</li>
 </ul></li>
 </ol>
 </section>
@@ -374,36 +389,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>HINT:</strong> Consider temporarily commenting out / rearranging the <code>geom_*()</code> layers to better understand how this plot is constructed</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>plot_us <span class="ot">&lt;-</span>  <span class="fu">ggplot</span>(df_us) <span class="sc">+</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="dv">0</span>, <span class="at">xmax =</span> <span class="dv">1</span>, <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> <span class="dv">1</span>, <span class="at">alpha =</span> opacity_val), </span>
-<span id="cb8-3"><a href="#cb8-3"></a>            <span class="at">fill =</span> accent) <span class="sc">+</span></span>
-<span id="cb8-4"><a href="#cb8-4"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.7</span>, <span class="at">label =</span> state), </span>
-<span id="cb8-5"><a href="#cb8-5"></a>            <span class="at">family =</span> <span class="st">"orb"</span>, </span>
-<span id="cb8-6"><a href="#cb8-6"></a>            <span class="at">fontface =</span> <span class="st">"bold"</span>,</span>
-<span id="cb8-7"><a href="#cb8-7"></a>            <span class="at">size =</span> <span class="dv">9</span>, </span>
-<span id="cb8-8"><a href="#cb8-8"></a>            <span class="at">color =</span> bg) <span class="sc">+</span></span>
-<span id="cb8-9"><a href="#cb8-9"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.3</span>, <span class="at">label =</span> <span class="fu">round</span>(num_obs_per10k, <span class="dv">1</span>)), </span>
-<span id="cb8-10"><a href="#cb8-10"></a>            <span class="at">family =</span> <span class="st">"orb"</span>, </span>
-<span id="cb8-11"><a href="#cb8-11"></a>            <span class="at">fontface =</span> <span class="st">"bold"</span>,</span>
-<span id="cb8-12"><a href="#cb8-12"></a>            <span class="at">size =</span> <span class="dv">8</span>, </span>
-<span id="cb8-13"><a href="#cb8-13"></a>            <span class="at">color =</span> bg) <span class="sc">+</span>  </span>
-<span id="cb8-14"><a href="#cb8-14"></a>  geofacet<span class="sc">::</span><span class="fu">facet_geo</span>(<span class="sc">~</span>state) <span class="sc">+</span></span>
-<span id="cb8-15"><a href="#cb8-15"></a>  <span class="fu">coord_fixed</span>(<span class="at">ratio =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb8-16"><a href="#cb8-16"></a>  <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">"Sightings per 10k population"</span>) <span class="sc">+</span></span>
-<span id="cb8-17"><a href="#cb8-17"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb8-18"><a href="#cb8-18"></a>  <span class="fu">theme</span>(</span>
-<span id="cb8-19"><a href="#cb8-19"></a>    <span class="at">strip.text =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb8-20"><a href="#cb8-20"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"bar"</span>, </span>
-<span id="cb8-21"><a href="#cb8-21"></a>                                 <span class="at">size =</span> <span class="dv">40</span>, </span>
-<span id="cb8-22"><a href="#cb8-22"></a>                                 <span class="at">color =</span> accent,</span>
-<span id="cb8-23"><a href="#cb8-23"></a>                                 <span class="at">hjust =</span> <span class="dv">1</span>,  </span>
-<span id="cb8-24"><a href="#cb8-24"></a>                                 <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">10</span>)),</span>
-<span id="cb8-25"><a href="#cb8-25"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span> </span>
-<span id="cb8-26"><a href="#cb8-26"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-2"><a href="#cb8-2"></a>  <span class="co"># Plot rectangles colored by the opacity value of df_us from 0 to 1 on x and y axis</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> <span class="dv">0</span>, <span class="at">xmax =</span> <span class="dv">1</span>, <span class="at">ymin =</span> <span class="dv">0</span>, <span class="at">ymax =</span> <span class="dv">1</span>, <span class="at">alpha =</span> opacity_val), </span>
+<span id="cb8-4"><a href="#cb8-4"></a>            <span class="at">fill =</span> accent) <span class="sc">+</span> <span class="co"># fill with customized color </span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>  <span class="co"># Add a label foreach state, specify where on each individual square the label should be </span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.7</span>, <span class="at">label =</span> state), </span>
+<span id="cb8-7"><a href="#cb8-7"></a>            <span class="at">family =</span> <span class="st">"orb"</span>, </span>
+<span id="cb8-8"><a href="#cb8-8"></a>            <span class="at">fontface =</span> <span class="st">"bold"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9"></a>            <span class="at">size =</span> <span class="dv">9</span>, </span>
+<span id="cb8-10"><a href="#cb8-10"></a>            <span class="at">color =</span> bg) <span class="sc">+</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a>  <span class="co"># Add text label for number of observations per state </span></span>
+<span id="cb8-12"><a href="#cb8-12"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.3</span>, <span class="at">label =</span> <span class="fu">round</span>(num_obs_per10k, <span class="dv">1</span>)), </span>
+<span id="cb8-13"><a href="#cb8-13"></a>            <span class="at">family =</span> <span class="st">"orb"</span>, </span>
+<span id="cb8-14"><a href="#cb8-14"></a>            <span class="at">fontface =</span> <span class="st">"bold"</span>,</span>
+<span id="cb8-15"><a href="#cb8-15"></a>            <span class="at">size =</span> <span class="dv">8</span>, </span>
+<span id="cb8-16"><a href="#cb8-16"></a>            <span class="at">color =</span> bg) <span class="sc">+</span>  </span>
+<span id="cb8-17"><a href="#cb8-17"></a>  <span class="co"># Facet by state using the geofacet package </span></span>
+<span id="cb8-18"><a href="#cb8-18"></a>  geofacet<span class="sc">::</span><span class="fu">facet_geo</span>(<span class="sc">~</span>state) <span class="sc">+</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a>  <span class="co"># Ensures map is a 1:1 ratio</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a>  <span class="fu">coord_fixed</span>(<span class="at">ratio =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb8-21"><a href="#cb8-21"></a>  <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">"Sightings per 10k population"</span>) <span class="sc">+</span></span>
+<span id="cb8-22"><a href="#cb8-22"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb8-23"><a href="#cb8-23"></a>  <span class="fu">theme</span>(</span>
+<span id="cb8-24"><a href="#cb8-24"></a>    <span class="at">strip.text =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb8-25"><a href="#cb8-25"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"bar"</span>, </span>
+<span id="cb8-26"><a href="#cb8-26"></a>                                 <span class="at">size =</span> <span class="dv">40</span>, </span>
+<span id="cb8-27"><a href="#cb8-27"></a>                                 <span class="at">color =</span> accent,</span>
+<span id="cb8-28"><a href="#cb8-28"></a>                                 <span class="at">hjust =</span> <span class="dv">1</span>,  </span>
+<span id="cb8-29"><a href="#cb8-29"></a>                                 <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">10</span>)),</span>
+<span id="cb8-30"><a href="#cb8-30"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span> </span>
+<span id="cb8-31"><a href="#cb8-31"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol start="13" type="1">
 <li><p><strong>Consider the order of <code>geom_*()</code> layers in the the above plot (<code>plot_us</code>). Why did the author order the layers in this way?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The author orders them by first establishing one single rectangle, specifying its position and aesthetics. The author then layers on text for state and ufo sightings. Since ggplot layers on features, we need to establish the background shape and text and then use <code>geofacet::</code> package to facet by state on a map of the U.S.</li>
 </ul></li>
 </ol>
 </section>
@@ -425,7 +445,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-13"><a href="#cb9-13"></a>            <span class="at">color =</span> bg, </span>
 <span id="cb9-14"><a href="#cb9-14"></a>            <span class="at">size =</span> <span class="dv">8</span>) <span class="sc">+</span> </span>
 <span id="cb9-15"><a href="#cb9-15"></a>  <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">9</span>) <span class="sc">+</span></span>
-<span id="cb9-16"><a href="#cb9-16"></a>  <span class="fu">xlim</span>(<span class="cn">NA</span>, <span class="fl">23.55</span>) <span class="sc">+</span></span>
+<span id="cb9-16"><a href="#cb9-16"></a>  <span class="co">#xlim(NA, 23.55) +</span></span>
 <span id="cb9-17"><a href="#cb9-17"></a>  <span class="fu">coord_polar</span>() <span class="sc">+</span></span>
 <span id="cb9-18"><a href="#cb9-18"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
 <span id="cb9-19"><a href="#cb9-19"></a>  <span class="fu">theme</span>(</span>
@@ -436,11 +456,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="14" type="1">
 <li><p><strong>This plot includes one-letter labels for each day of the week. How is ths accomplished when week days are written using their three-letter abbreviations (e.g.&nbsp;<code>Mon</code>, <code>Tue</code>) in the <code>df_day_hour</code> data frame?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>This is done with line 314 of the code where the author uses <code>str_sub</code> to extract one letter with the start and end arguments.</li>
 </ul></li>
 <li><p><strong>What role do the <code>ylim()</code> and <code>xlim()</code> functions play in shaping a ggplot, and how do they change the visual layout of this particular plot? To better understand their effect, try rerunning the code with each of these lines commented out and observe how the plot’s spacing and composition change.</strong></p>
 <ul>
-<li>Answer here</li>
+<li>In a ggplot, the <code>ylim()</code> and <code>xlim()</code> features can adjust for the limits to the x and y axis. For this particular plot, these coordiantes are used before the <code>coord_polar</code> feature (used for pie charts), which makes y the radius of the plot. Since the y axis is day, the limit specifies how the days should line up along the radius, and the x-axis corresponds to the hour, the numbers controls the way the tiles wrap around the pie.</li>
 </ul></li>
 </ol>
 </section>
@@ -494,12 +514,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-44"><a href="#cb10-44"></a>  <span class="fu">xlim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb10-45"><a href="#cb10-45"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb10-46"><a href="#cb10-46"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb10-47"><a href="#cb10-47"></a>  <span class="fu">coord_cartesian</span>(<span class="at">clip =</span> <span class="st">"off"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-47"><a href="#cb10-47"></a>  <span class="fu">coord_cartesian</span>(<span class="at">clip =</span> <span class="st">"off"</span>)</span>
+<span id="cb10-48"><a href="#cb10-48"></a></span>
+<span id="cb10-49"><a href="#cb10-49"></a>quote1</span>
+<span id="cb10-50"><a href="#cb10-50"></a>quote2</span>
+<span id="cb10-51"><a href="#cb10-51"></a>quote3</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol start="16" type="1">
 <li><p><strong>Why do you think the author chose to convert these text elements (and also in <code>plot_ufo</code>, below!) into ggplot objects (you may consider returning to this question after you’ve worked your way through all of the code)?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The author decided to convert the text elements into ggplot objects in order to plot them on the base plot in lines 468-470. By converting them into ggplot objects, they can be adjusted with more details and placed in specific locations on the base plot with <code>inset_element</code>.</li>
 </ul></li>
 </ol>
 </section>
@@ -541,16 +565,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-21"><a href="#cb12-21"></a>                                 <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">20</span>)),</span>
 <span id="cb12-22"><a href="#cb12-22"></a>    <span class="at">plot.caption =</span> ggtext<span class="sc">::</span><span class="fu">element_markdown</span>(<span class="at">family =</span> <span class="st">"bar"</span>,</span>
 <span id="cb12-23"><a href="#cb12-23"></a>                                            <span class="at">face =</span> <span class="st">"italic"</span>,</span>
-<span id="cb12-24"><a href="#cb12-24"></a>                                            <span class="at">color =</span> colorspace<span class="sc">::</span><span class="fu">darken</span>(accent, <span class="fl">0.25</span>),</span>
+<span id="cb12-24"><a href="#cb12-24"></a>                                           <span class="at">color =</span> colorspace<span class="sc">::</span><span class="fu">darken</span>(accent, <span class="fl">0.25</span>),</span>
 <span id="cb12-25"><a href="#cb12-25"></a>                                            <span class="at">hjust =</span> <span class="fl">0.5</span>,</span>
 <span id="cb12-26"><a href="#cb12-26"></a>                                            <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">20</span>)),</span>
 <span id="cb12-27"><a href="#cb12-27"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">20</span>, <span class="at">t =</span> <span class="dv">50</span>, <span class="at">r =</span> <span class="dv">50</span>, <span class="at">l =</span> <span class="dv">50</span>)</span>
-<span id="cb12-28"><a href="#cb12-28"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-28"><a href="#cb12-28"></a>  )</span>
+<span id="cb12-29"><a href="#cb12-29"></a>plot_base</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol start="17" type="1">
 <li><p><strong>Why does the author render <code>plot.caption</code> using <code>ggtext::element_markdown()</code>, rather than <code>element_text()</code> (like he does for rendering <code>plot.title</code> and <code>text</code>)?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The author uses <code>element_markdown()</code> to render more caption features that are not used in the <code>element_text()</code> feature of ggplot. Additionally, using <code>element_markdown</code> is helpful for captions because they might already contain some markdown styling and often include different styles in one line, which this feature can perform.</li>
 </ul></li>
 </ol>
 </section>
@@ -581,11 +606,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="18" type="1">
 <li><p><strong>Explain how <code>plot_final</code> is assembled. What do you think is the most challenging aspect of arranging all components into a single plot?</strong></p>
 <ul>
-<li>Answer here</li>
+<li><code>plot_final</code> is assembled by first initializing a base plot with <code>plot_base()</code>. Then, the shapes are positioned by defining their position on the base plot with the left, right, and bottom arguments. The plot is then filled with a background color from the pre-defined aesthetics. The most challenging aspect of arranging all components into a single plot is specifying the arguments correctly and layering the ggplot elements correctly.</li>
 </ul></li>
 <li><p><strong>Can you think of one reason the author may have chosen to separate the construction of <code>plot_base</code> and <code>plot_final</code>?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>By adding the <code>inset_element</code> to the plot base, this allows for you to add layers onto the base like painting a canvas. These pieces for the <code>plot_final</code> and can be adjusted and iterable when needed.</li>
 </ul></li>
 </ol>
 </section>
@@ -596,32 +621,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="a">
 <li><p><strong>What “perceptual tasks” (from Cleveland &amp; McGill’s heirarchy) must the viewer perform to extract information from these visualizations?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The final visualization is easy to understand because the author balances these percetual tasks. For instance, the bar chart of top ten most commonly reported shapes is an example of great positioning, where the viewer judges the length of the bars to obtain information. Additionally, the author utilizing hue and shade to display patterns in the data. For instance, the map of sightings per 10k population is easy to understand because it utilizes hue to show which states have the most ufo sightings.</li>
 </ul></li>
 <li><p><strong>What task(s) do you think the author wanted to enable or message(s) he wanted to convey with these visualizations (see lecture 2.1, slide 16 for examples)? Be sure to note at least one task / message for each of the three data viz.</strong></p>
 <ul>
-<li>Answer here</li>
+<li>The author was interested in showing individual values between ufo shapes, state sightings, and time of day sightinings, however they also wanted to compare these trends within each respective plot. For the “ten most commonly reported shapes” graph, the author was interested in showing trends across reported shapes. The inclusion of the data values for each shape was very intentional and also allows you to compare the individual values across shapes. For the “sightings per 10k population” graph, the author is comparing individual state values for ufo sightings, and due to the nature of the graph being a map, it also is including a spatial element to the message. For the pie chart graph of the most common hours, this graph is clearly displaying big picture trends in ufo sightings on a temporal scale.</li>
 </ul></li>
 <li><p><strong>Name at least one caveat to the “hierarchy of perceptual tasks” that the author employed to achieve a goal(s) you noted in question b?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>One caveat is that the when glancing at the graph, you can easily draw conclusions solely based on the way the elements are arranged. For the “10 most commonly reported shapes”, the data most clearly shows that light is the most reported shape with the inclusion of the data value. By making this bar the strongest hue, it clearly displays the message.</li>
 </ul></li>
 </ol></li>
 <li><p><strong>Describe two elements of this piece that you find visually-pleasing / easy to understand / intuitive. Why?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>I think that the use of hue and the inclusion of the map of the US are visually-pleasing. I find that using hue against the black base plot is eye-catching and also easy to understand. I think the inclusion of the map of the US was very smart, as you could just show the top ten most common states with ufo sightings, but by including a map you get to see the trends spatially which is interesting.</li>
 </ul></li>
 <li><p><strong>Describe two elements of this piece that you feel could be better presented in a different way. Why?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>I am personally not a fan of the bottom left graph because of the lack of title and the visual is less intiutive. You can infer that the hours 1 am to 4 am are peak hours for ufo sightings, however the hours around the chart coupled with the grid-like style add too much visual cognitive load.</li>
 </ul></li>
 <li><p><strong>Describe two new things that you learned by interpreting / annotating this code. These could be packages, functions, or even code organizational approaches that you hadn’t previously known about or considered.</strong></p>
 <ul>
-<li>Answer here</li>
+<li>I learned about the use of pre-defnining graphing aesthetics before graphing. I learned new data wrangling techniques with <code>fct_reorder</code>. I learned about the <code>geofacet</code> package.</li>
 </ul></li>
 <li><p><strong>How, if at all, did you use AI tools to help you interpret this code? Describe your approach to using these tools for this assignment. In what ways was consulting the documentation more (or less) helpful than using AI?</strong></p>
 <ul>
-<li>Answer here</li>
+<li>I utilized ChatGPT for a few questions for this assignment. I found that when prompting it with the code and asking for it to add comments, that was a quick way to break down the complexities. What I found more helpful was looking up the documentation in the console. Since this is how I originally learned ot code, I found that this interface is easy to understand especially when viewing what arguments do what in each function.</li>
 </ul></li>
 </ol>
 </section>
