@@ -34,4 +34,4 @@ places <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesda
 ```
 
 ## Acknowledgments 
-I would like to acknowledge the EDS-240 Data Visualization and Communications course's instructor and co-instructor Sam Shanny-Csik and Annie Adams. I would also like to acknowledge the work of Dan Oehm. 
+I would like to acknowledge the EDS-240 Data Visualization and Communications course's instructor and co-instructor Sam Shanny-Csik and Annie Adams. This repository is a template created by Sam Shanny-Csik and can be accessed [here](https://github.com/EDS-240-Data-Viz/eds240-hw1-ufo). I would also like to acknowledge the work of Dan Oehm. 
